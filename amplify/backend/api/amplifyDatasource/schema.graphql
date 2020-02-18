@@ -1,5 +1,48 @@
-type Note @model @auth(rules: [{ allow: owner }]) {
+type Note @model {
   id: ID!
   note: String
   owner: String
+}
+type Session @model {
+    id: ID!
+    name: String
+    description: String
+    questions: [Question] @connection(name: "SessionQuestions")
+    medicalTranscripts: [MedicalTranscript] @connection(name: "SessionMedicalTranscripts")
+    textTranscripts: [TextTranscript] @connection(name: "SessionTextTranscripts")
+    symptoms: [Symptom] @connection(name: "SessionSymptoms")
+}
+
+type MedicalTranscript @model {
+    id: ID!
+    entities: String
+    unmappedAttributes: String
+    modelVersion: String
+    session: Session @connection(name: "SessionMedicalTranscripts")
+}
+
+type TextTranscript @model{
+    id: ID!
+    jobName: String
+    accountId: String
+    results: String
+    status: String
+    transcriptionText: String
+    session: Session @connection(name: "SessionTextTranscripts")
+}
+
+
+type Question @model {
+    id: ID!
+    name: String!
+    description: String
+    session: Session @connection(name: "SessionQuestions")
+}
+
+
+type Symptom @model {
+    id: ID!
+    name: String
+    description: String
+    session: Session @connection(name: "SessionSymptoms")
 }

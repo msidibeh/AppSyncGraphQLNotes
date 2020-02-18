@@ -4,8 +4,13 @@ import { schema } from './schema';
 
 
 
-const { Note } = initSchema(schema);
+const { Note, Session, Question, MedicalTranscript, TextTranscript, Symptom } = initSchema(schema);
 
 export {
-  Note
+  Note,
+  Session,
+  Question,
+  MedicalTranscript,
+  TextTranscript,
+  Symptom
 };

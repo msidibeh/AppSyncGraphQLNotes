@@ -1,10 +1,61 @@
 type Note {
   id: ID!
-  note: String!
+  note: String
+  owner: String
   _version: Int!
   _deleted: Boolean
   _lastChangedAt: AWSTimestamp!
-  owner: String
+}
+
+type Session {
+  id: ID!
+  name: String
+  description: String
+  questions(filter: ModelQuestionFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelQuestionConnection
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
+}
+
+type MedicalTranscript {
+  id: ID!
+  entities: String
+  unmappedAttributes: String
+  modelVersion: String
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
+}
+
+type TextTranscript {
+  id: ID!
+  jobName: String
+  accountId: String
+  results: String
+  status: String
+  transcriptionText: String
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
+}
+
+type Question {
+  id: ID!
+  name: String!
+  description: String
+  session: Session
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
+}
+
+type Symptom {
+  id: ID!
+  name: String
+  description: String
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
 }
 
 enum ModelSortDirection {
@@ -94,6 +145,7 @@ input ModelSizeInput {
 input ModelNoteFilterInput {
   id: ModelIDInput
   note: ModelStringInput
+  owner: ModelStringInput
   and: [ModelNoteFilterInput]
   or: [ModelNoteFilterInput]
   not: ModelNoteFilterInput
@@ -103,17 +155,34 @@ type Query {
   syncNotes(filter: ModelNoteFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelNoteConnection
   getNote(id: ID!): Note
   listNotes(filter: ModelNoteFilterInput, limit: Int, nextToken: String): ModelNoteConnection
+  syncSessions(filter: ModelSessionFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelSessionConnection
+  getSession(id: ID!): Session
+  listSessions(filter: ModelSessionFilterInput, limit: Int, nextToken: String): ModelSessionConnection
+  syncMedicalTranscripts(filter: ModelMedicalTranscriptFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelMedicalTranscriptConnection
+  getMedicalTranscript(id: ID!): MedicalTranscript
+  listMedicalTranscripts(filter: ModelMedicalTranscriptFilterInput, limit: Int, nextToken: String): ModelMedicalTranscriptConnection
+  syncTextTranscripts(filter: ModelTextTranscriptFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelTextTranscriptConnection
+  getTextTranscript(id: ID!): TextTranscript
+  listTextTranscripts(filter: ModelTextTranscriptFilterInput, limit: Int, nextToken: String): ModelTextTranscriptConnection
+  syncQuestions(filter: ModelQuestionFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelQuestionConnection
+  getQuestion(id: ID!): Question
+  listQuestions(filter: ModelQuestionFilterInput, limit: Int, nextToken: String): ModelQuestionConnection
+  syncSymptoms(filter: ModelSymptomFilterInput, limit: Int, nextToken: String, lastSync: AWSTimestamp): ModelSymptomConnection
+  getSymptom(id: ID!): Symptom
+  listSymptoms(filter: ModelSymptomFilterInput, limit: Int, nextToken: String): ModelSymptomConnection
 }
 
 input CreateNoteInput {
   id: ID
-  note: String!
+  note: String
+  owner: String
   _version: Int
 }
 
 input UpdateNoteInput {
   id: ID!
   note: String
+  owner: String
   _version: Int
 }
 
@@ -126,10 +195,26 @@ type Mutation {
   createNote(input: CreateNoteInput!, condition: ModelNoteConditionInput): Note
   updateNote(input: UpdateNoteInput!, condition: ModelNoteConditionInput): Note
   deleteNote(input: DeleteNoteInput!, condition: ModelNoteConditionInput): Note
+  createSession(input: CreateSessionInput!, condition: ModelSessionConditionInput): Session
+  updateSession(input: UpdateSessionInput!, condition: ModelSessionConditionInput): Session
+  deleteSession(input: DeleteSessionInput!, condition: ModelSessionConditionInput): Session
+  createMedicalTranscript(input: CreateMedicalTranscriptInput!, condition: ModelMedicalTranscriptConditionInput): MedicalTranscript
+  updateMedicalTranscript(input: UpdateMedicalTranscriptInput!, condition: ModelMedicalTranscriptConditionInput): MedicalTranscript
+  deleteMedicalTranscript(input: DeleteMedicalTranscriptInput!, condition: ModelMedicalTranscriptConditionInput): MedicalTranscript
+  createTextTranscript(input: CreateTextTranscriptInput!, condition: ModelTextTranscriptConditionInput): TextTranscript
+  updateTextTranscript(input: UpdateTextTranscriptInput!, condition: ModelTextTranscriptConditionInput): TextTranscript
+  deleteTextTranscript(input: DeleteTextTranscriptInput!, condition: ModelTextTranscriptConditionInput): TextTranscript
+  createQuestion(input: CreateQuestionInput!, condition: ModelQuestionConditionInput): Question
+  updateQuestion(input: UpdateQuestionInput!, condition: ModelQuestionConditionInput): Question
+  deleteQuestion(input: DeleteQuestionInput!, condition: ModelQuestionConditionInput): Question
+  createSymptom(input: CreateSymptomInput!, condition: ModelSymptomConditionInput): Symptom
+  updateSymptom(input: UpdateSymptomInput!, condition: ModelSymptomConditionInput): Symptom
+  deleteSymptom(input: DeleteSymptomInput!, condition: ModelSymptomConditionInput): Symptom
 }
 
 input ModelNoteConditionInput {
   note: ModelStringInput
+  owner: ModelStringInput
   and: [ModelNoteConditionInput]
   or: [ModelNoteConditionInput]
   not: ModelNoteConditionInput
@@ -149,7 +234,261 @@ enum ModelAttributeTypes {
 }
 
 type Subscription {
-  onCreateNote(owner: String!): Note @aws_subscribe(mutations: ["createNote"])
-  onUpdateNote(owner: String!): Note @aws_subscribe(mutations: ["updateNote"])
-  onDeleteNote(owner: String!): Note @aws_subscribe(mutations: ["deleteNote"])
+  onCreateNote: Note @aws_subscribe(mutations: ["createNote"])
+  onUpdateNote: Note @aws_subscribe(mutations: ["updateNote"])
+  onDeleteNote: Note @aws_subscribe(mutations: ["deleteNote"])
+  onCreateSession: Session @aws_subscribe(mutations: ["createSession"])
+  onUpdateSession: Session @aws_subscribe(mutations: ["updateSession"])
+  onDeleteSession: Session @aws_subscribe(mutations: ["deleteSession"])
+  onCreateMedicalTranscript: MedicalTranscript @aws_subscribe(mutations: ["createMedicalTranscript"])
+  onUpdateMedicalTranscript: MedicalTranscript @aws_subscribe(mutations: ["updateMedicalTranscript"])
+  onDeleteMedicalTranscript: MedicalTranscript @aws_subscribe(mutations: ["deleteMedicalTranscript"])
+  onCreateTextTranscript: TextTranscript @aws_subscribe(mutations: ["createTextTranscript"])
+  onUpdateTextTranscript: TextTranscript @aws_subscribe(mutations: ["updateTextTranscript"])
+  onDeleteTextTranscript: TextTranscript @aws_subscribe(mutations: ["deleteTextTranscript"])
+  onCreateQuestion: Question @aws_subscribe(mutations: ["createQuestion"])
+  onUpdateQuestion: Question @aws_subscribe(mutations: ["updateQuestion"])
+  onDeleteQuestion: Question @aws_subscribe(mutations: ["deleteQuestion"])
+  onCreateSymptom: Symptom @aws_subscribe(mutations: ["createSymptom"])
+  onUpdateSymptom: Symptom @aws_subscribe(mutations: ["updateSymptom"])
+  onDeleteSymptom: Symptom @aws_subscribe(mutations: ["deleteSymptom"])
+}
+
+type ModelSessionConnection {
+  items: [Session]
+  nextToken: String
+  startedAt: AWSTimestamp
+}
+
+input ModelSessionFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelSessionFilterInput]
+  or: [ModelSessionFilterInput]
+  not: ModelSessionFilterInput
+}
+
+input CreateSessionInput {
+  id: ID
+  name: String
+  description: String
+  _version: Int
+}
+
+input UpdateSessionInput {
+  id: ID!
+  name: String
+  description: String
+  _version: Int
+}
+
+input DeleteSessionInput {
+  id: ID
+  _version: Int
+}
+
+input ModelSessionConditionInput {
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelSessionConditionInput]
+  or: [ModelSessionConditionInput]
+  not: ModelSessionConditionInput
+}
+
+type ModelMedicalTranscriptConnection {
+  items: [MedicalTranscript]
+  nextToken: String
+  startedAt: AWSTimestamp
+}
+
+input ModelMedicalTranscriptFilterInput {
+  id: ModelIDInput
+  entities: ModelStringInput
+  unmappedAttributes: ModelStringInput
+  modelVersion: ModelStringInput
+  and: [ModelMedicalTranscriptFilterInput]
+  or: [ModelMedicalTranscriptFilterInput]
+  not: ModelMedicalTranscriptFilterInput
+}
+
+input CreateMedicalTranscriptInput {
+  id: ID
+  entities: String
+  unmappedAttributes: String
+  modelVersion: String
+  _version: Int
+}
+
+input UpdateMedicalTranscriptInput {
+  id: ID!
+  entities: String
+  unmappedAttributes: String
+  modelVersion: String
+  _version: Int
+}
+
+input DeleteMedicalTranscriptInput {
+  id: ID
+  _version: Int
+}
+
+input ModelMedicalTranscriptConditionInput {
+  entities: ModelStringInput
+  unmappedAttributes: ModelStringInput
+  modelVersion: ModelStringInput
+  and: [ModelMedicalTranscriptConditionInput]
+  or: [ModelMedicalTranscriptConditionInput]
+  not: ModelMedicalTranscriptConditionInput
+}
+
+type ModelTextTranscriptConnection {
+  items: [TextTranscript]
+  nextToken: String
+  startedAt: AWSTimestamp
+}
+
+input ModelTextTranscriptFilterInput {
+  id: ModelIDInput
+  jobName: ModelStringInput
+  accountId: ModelStringInput
+  results: ModelStringInput
+  status: ModelStringInput
+  transcriptionText: ModelStringInput
+  and: [ModelTextTranscriptFilterInput]
+  or: [ModelTextTranscriptFilterInput]
+  not: ModelTextTranscriptFilterInput
+}
+
+input CreateTextTranscriptInput {
+  id: ID
+  jobName: String
+  accountId: String
+  results: String
+  status: String
+  transcriptionText: String
+  _version: Int
+}
+
+input UpdateTextTranscriptInput {
+  id: ID!
+  jobName: String
+  accountId: String
+  results: String
+  status: String
+  transcriptionText: String
+  _version: Int
+}
+
+input DeleteTextTranscriptInput {
+  id: ID
+  _version: Int
+}
+
+input ModelTextTranscriptConditionInput {
+  jobName: ModelStringInput
+  accountId: ModelStringInput
+  results: ModelStringInput
+  status: ModelStringInput
+  transcriptionText: ModelStringInput
+  and: [ModelTextTranscriptConditionInput]
+  or: [ModelTextTranscriptConditionInput]
+  not: ModelTextTranscriptConditionInput
+}
+
+input SessionInput {
+  id: ID!
+  name: String
+  description: String
+  _version: Int!
+  _deleted: Boolean
+  _lastChangedAt: AWSTimestamp!
+}
+
+type ModelQuestionConnection {
+  items: [Question]
+  nextToken: String
+  startedAt: AWSTimestamp
+}
+
+input ModelQuestionFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelQuestionFilterInput]
+  or: [ModelQuestionFilterInput]
+  not: ModelQuestionFilterInput
+}
+
+input CreateQuestionInput {
+  id: ID
+  name: String!
+  description: String
+  session: SessionInput
+  _version: Int
+  questionSessionId: ID
+}
+
+input UpdateQuestionInput {
+  id: ID!
+  name: String
+  description: String
+  session: SessionInput
+  _version: Int
+  questionSessionId: ID
+}
+
+input DeleteQuestionInput {
+  id: ID
+  _version: Int
+}
+
+input ModelQuestionConditionInput {
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelQuestionConditionInput]
+  or: [ModelQuestionConditionInput]
+  not: ModelQuestionConditionInput
+}
+
+type ModelSymptomConnection {
+  items: [Symptom]
+  nextToken: String
+  startedAt: AWSTimestamp
+}
+
+input ModelSymptomFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelSymptomFilterInput]
+  or: [ModelSymptomFilterInput]
+  not: ModelSymptomFilterInput
+}
+
+input CreateSymptomInput {
+  id: ID
+  name: String
+  description: String
+  _version: Int
+}
+
+input UpdateSymptomInput {
+  id: ID!
+  name: String
+  description: String
+  _version: Int
+}
+
+input DeleteSymptomInput {
+  id: ID
+  _version: Int
+}
+
+input ModelSymptomConditionInput {
+  name: ModelStringInput
+  description: ModelStringInput
+  and: [ModelSymptomConditionInput]
+  or: [ModelSymptomConditionInput]
+  not: ModelSymptomConditionInput
 }
